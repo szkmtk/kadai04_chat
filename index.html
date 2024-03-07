@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatアプリ</title>
+<link rel="stylesheet" href="style.css"> <!-- スタイルシートへのパスを必要に応じて調整してください -->
+</head>
+<body>
+
+<!-- コンテンツ表示画面 -->
+<div id="messages"></div>
+<input type="text" id="name-input" placeholder="名前を入力..."> <!-- 名前入力フィールドを追加 -->
+<input type="text" id="message-input" placeholder="メッセージを入力...">
+<button id="send-button">送信</button>
+<!--/ コンテンツ表示画面 -->
+
+<!-- 以下JavaScript領域 -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<!-- 以下Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script>
+// Firebaseの設定
+var firebaseConfig = {
+    apiKey: "AIzaSyAsxm3vuaQDzzBtZCroP8xhe5X0IYo6DbE",
+    authDomain: "kadai4-chat.firebaseapp.com",
+    databaseURL: "https://kadai4-chat-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "kadai4-chat",
+    storageBucket: "kadai4-chat.appspot.com",
+    messagingSenderId: "104252858177",
+    appId: "1:104252858177:web:7a5bc64aab0e799268cbc0"
+};
+// Firebaseを初期化
+firebase.initializeApp(firebaseConfig);
+
+// メッセージと名前を送信する関数
+$('#send-button').click(function(){
+    var nameInput = $('#name-input').val(); // 名前を取得
+    var messageInput = $('#message-input').val();
+    var messagesRef = firebase.database().ref('messages');
+    messagesRef.push().set({
+        name: nameInput, // 名前もデータベースに保存
+        text: messageInput,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+    $('#message-input').val(''); // メッセージ入力フィールドをクリア
+});
+
+// メッセージをリアルタイムで表示する関数
+firebase.database().ref('messages').on('child_added', function(snapshot) {
+    var message = snapshot.val();
+    var date = new Date(message.timestamp); // タイムスタンプを日付に変換
+    var dateString = date.toLocaleString(); // 日付を文字列に変換
+    var messageElement = $('<div/>').text(message.name + ": " + message.text + " (" + dateString + ")"); // 名前、メッセージ、投稿日時を表示
+    $('#messages').append(messageElement);
+});
+
+</script>
+</body>
+</html>
